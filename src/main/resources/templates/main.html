@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>LControl.An</title>
+</head>
+<style>
+    body{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #E5E5E5;
+    }
+    .main{
+        width: 1100px;
+        height: 750px;
+
+        background-color: #ffffff;
+        display: flex;
+        flex-direction: column;
+
+        justify-content: space-between;
+        align-items: center;
+    }
+    .top_bar{
+        width: 100%;
+
+        display: flex;
+        justify-content: left;
+
+        background-color: #DDDDDD;
+        border-bottom: thin solid #ACACAC;
+    }
+    .top_bar>button{
+        width: 92px;
+        height: 32px;
+
+        font-weight: bold;
+        font-size: 16px;
+
+        border: none;
+        background-color: #DDDDDD;
+    }
+    .top_bar>button:active{
+        background-color: #b4b4b4;
+    }
+
+    .center_cnt{
+        width: calc(100% - 20px);
+        max-height: 650px;
+
+        padding: 10px;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+    }
+    .history_cnt{
+        height:550px;
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .history_cnt>h3{
+        margin-bottom: 10px;
+    }
+
+    .history_info_cnt{
+        height:500px;
+        width: 250px;
+        border: thick double #ACACAC;
+
+        overflow-y: scroll;
+    }
+    .history_info_cnt>div{
+        box-sizing: content-box;
+        padding-left: 5px;
+        padding-right: 5px;
+        width: calc(100% - 10px);
+
+        margin-top: 5px;
+
+        justify-content: space-between;
+        align-items: center;
+        display: flex;
+    }
+    .history_info_cnt>div>img{
+        height: 18px;
+        width: 18px;
+
+        object-fit: contain;
+        margin-right: 5px;
+        align-self: flex-end;
+    }
+    .accept_img{
+        content:url("img/accept.png");
+    }
+    .reject_img{
+        content:url("img/reject.png");
+    }
+
+    .main_cnt{
+        margin-top: 50px;
+
+        width: 800px;
+        display: flex;
+        flex-direction: column;
+    }
+    .main_cnt>div{
+        display: flex;
+        width: 100%;
+
+        justify-content: space-between;
+    }
+    .text_info_cnt{
+        width: 240px;
+    }
+
+    .text_info_cnt>div{
+        margin-bottom: 10px;
+    }
+    .text_info_cnt>div>div{
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+    .text_info_cnt>div>div>div{
+        max-width: 120px;
+        word-wrap: break-word;
+    }
+    .text_info_cnt>div>div:nth-child(1){
+        text-align: left;
+    }
+    .text_info_cnt h3{
+        font-weight: bold;
+        height: 30px;
+        margin: 0px;
+        font-size: 28px;
+        max-width: 240px;
+        color: #0FBA00;
+    }
+
+    .anode_view_info{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        width:500px;
+        height: 400px;
+    }
+
+    .represent{
+        width:80%;
+        height: 80%;
+
+        object-fit: contain;
+    }
+
+    .downside_cnt{
+        align-items: flex-end;
+    }
+
+    .statistic{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .statistic>div{
+        margin-right: 15px;
+        width: 300px;
+    }
+
+    .statistic>div>text{
+        font-weight: normal;
+        font-size: 16px;
+    }
+    .statistic>div .accept{
+        font-weight: bold;
+        color: #0FBA00;
+    }
+
+    .statistic>div .reject{
+        font-weight: bold;
+        color: #BB271A;
+    }
+
+
+    .actions>*{
+        margin-left: 15px;
+        width: 40px;
+        height: 40px;
+        background-color: #FFFFFF;
+        border: none;
+    }
+    .actions img{
+        object-fit: contain;
+    }
+
+    .bottom_cnt{
+        width: calc(100% - 20px);
+        height: 125px;
+        background-color: #DDDDDD;
+        border-top: thick double #ACACAC;
+        padding: 10px;
+
+    }
+    #log{
+        overflow-y: auto;
+        width: calc(100% - 10px);
+        height: calc(100% - 10px);
+        max-height: calc(100% - 10px);
+        padding: 5px;
+        background-color: #FFFFFF;
+
+        display: flex;
+        flex-direction: column;
+
+
+    }
+    #log>*{
+        margin-bottom: 2px;
+    }
+    .hidden{
+        display: none;
+    }
+
+
+    .lidar_actions_cnt{
+        position: relative;
+        max-height: 0px;
+        top:33px;
+        left:0px;
+    }
+    .log_actions_cnt{
+        position: relative;
+        max-height: 0px;
+        top:33px;
+        left:92px;
+    }
+
+    .cart_actions_cnt{
+        position: relative;
+        max-height: 0px;
+        top:33px;
+        left:184px;
+    }
+
+    .lidar_actions, .cart_actions, .log_actions{
+        display: flex;
+        flex-direction: column;
+        width: 150px;
+        border-bottom: 2px solid #ACACAC ;
+    }
+    .lidar_actions>button, .cart_actions>button, .log_actions>button{
+        border: none;
+        height: 28px;
+        background-color: #DDDDDD;
+        border-bottom: thin solid #ACACAC;
+    }
+    .lidar_actions>button:active, .cart_actions>button:active, .log_actions>button:active{
+        background-color: #b4b4b4;
+    }
+
+    .lidar_wait_status{
+        height: 16px;
+        width: 16px;
+
+        object-fit: contain;
+    }
+
+
+</style>
+<body>
+
+<div>
+    <div class="lidar_actions_cnt hidden">
+        <div class="lidar_actions ">
+            <button id="reboot">Reboot lidar</button>
+            <button id="configure">Configure lidar</button>
+        </div>
+    </div>
+    <div class="log_actions_cnt hidden">
+        <div class="log_actions ">
+            <button id="clean_log">Отчистить лог</button>
+        </div>
+    </div>
+    <div class="cart_actions_cnt hidden">
+        <div class="cart_actions ">
+            <button id="run_cart">Старт</button>
+            <button id="stop_cart">Стоп</button>
+            <button id="reset_cart">Исходное</button>
+        </div>
+    </div>
+    <div class="main">
+        <div class="top_bar"><button class="lidar_btn">Lidar</button><button class="log_btn">Лог</button><button class="cart_btn">Каретка</button></div>
+
+
+        <div class="center_cnt">
+
+            <div class="history_cnt">
+                <h3>История</h3>
+                <div class="history_info_cnt">
+                    <div><text>000547432 - тип 1</text> <img class="accept_img"></div>
+                    <div><text>000547433 - тип 1</text> <img class="accept_img"></div>
+                    <div><text>000547434 - тип 1</text> <img class="accept_img"></div>
+                    <div><text>000547435 - тип 1</text> <img class="reject_img"></div>
+                </div>
+            </div>
+            <div class="main_cnt">
+                <div>
+                    <div class="text_info_cnt" th:utext="${html}">абудаби</div>
+                    <div class="anode_view_info">
+                        <img class="represent_loading hidden" src="img/loading.gif">
+                        <img class="represent" src="img/Anod.png">
+                    </div>
+                </div>
+                <div class="downside_cnt">
+                    <div class="statistic">
+                        <div><text>Lidar: <text id="lidar_need_reboot" class="reject" >Нужна перезагрузка</text> <text id="lidar_need_config" class="reject hidden" >Нужна конфигурация</text> <text id="lidar_ready" class="accept hidden" >Готов к сканированию</text> <img id="lidar_wait_answer" class="lidar_wait_status hidden" src="img/loading.gif"></text></div>
+                        <div><text>Анод: <text class="reject">Отсутствует</text></text></div>
+                    </div>
+                    <div class="actions">
+                        <button id="start"><img src="img/play1.png"></button>
+                        <button id="stop"><img src="img/stop1.png"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bottom_cnt">
+            <div id="log"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+    function sendRequest(to, type, message){
+        let feedback;
+        fetch(to, {
+            method: type,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(message),
+        })
+            .then((response) => {
+                scan_results = response;
+
+                if(to == "startScan"){
+                    console.log(response.text().then(function (data){
+                        $(".text_info_cnt").html(data)
+                    }));
+                    $(".represent_loading").toggleClass("hidden");
+                    $(".represent").toggleClass("hidden");
+                    $("#log").append("<text>Сканирование окончено.</text>")
+                }
+                if(to == "rebootLidar"){
+                    $("#lidar_need_reboot").addClass("hidden");
+                    $("#lidar_need_config").removeClass("hidden");
+                    $("#lidar_ready").addClass("hidden");
+                    $("#lidar_wait_answer").addClass("hidden");
+                    $("#reboot").prop( "disabled", false );
+                    $("#configure").prop( "disabled", false );
+                    $("#start").prop( "disabled", true );
+                    $("#log").append("<text>Lidar перезапущен.</text>")
+
+                }
+                if(to == "configureLidar"){
+                    $("#lidar_need_reboot").addClass("hidden");
+                    $("#lidar_need_config").addClass("hidden");
+                    $("#lidar_ready").removeClass("hidden");
+                    $("#lidar_wait_answer").addClass("hidden");
+                    $("#reboot").prop( "disabled", false );
+                    $("#configure").prop( "disabled", false );
+                    $("#start").prop( "disabled", false );
+                    $("#log").append("<text>Lidar успешно сконфигурирован.</text>")
+                }
+
+                if(to == "runCart"){
+                    $("#log").append("<text>Каретка находится в конде рельс.</text>")
+                }
+                if(to == "stopCart"){
+                    $("#log").append("<text>Каретка остановлена.</text>")
+                }
+                if(to == "resetCart"){
+                    $("#log").append("<text>Каретка находится в конде рельс.</text>")
+                }
+
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+    }
+    let scan_results = null
+
+    $(document).ready(function (){
+        $("#start").prop( "disabled", true );
+        $("#configure").prop( "disabled", true );
+
+        $("#start").click(function (){
+            $(".represent").toggleClass("hidden");
+            $(".represent_loading").toggleClass("hidden");
+            console.log("sent_scan_request");
+            $("#log").append("<text>Запрос на сканирование отправлен...</text>")
+            sendRequest("startScan", "POST", null);
+        });
+
+        $(".lidar_btn").click(function (){
+            $(".lidar_actions_cnt").toggleClass("hidden");
+        });
+        $(".cart_btn").click(function (){
+            $(".cart_actions_cnt").toggleClass("hidden");
+        });
+        $(".log_btn").click(function (){
+            $(".log_actions_cnt").toggleClass("hidden");
+        });
+        $("#clean_log").click(function (){
+            $("#log").empty();
+            $("#log").append("<text>Лог очищен.</text>")
+        });
+
+
+        $(document).click(function (event) {
+            var target = $(event.target);
+            console.log(target.attr('class'))
+            if(target.attr('class') != "lidar_btn"){
+                $(".lidar_actions_cnt").addClass("hidden")
+            }
+            if(target.attr('class') != "cart_btn"){
+                $(".cart_actions_cnt").addClass("hidden")
+            }
+            if(target.attr('class') != "log_btn"){
+                $(".log_actions_cnt").addClass("hidden")
+            }
+        });
+        $("#run_cart").click(function (){
+            $("#run_cart").prop("disabled", true);
+            $("#reset_cart").prop("disabled", false);
+            sendRequest("runCart", "POST", null);
+            $("#log").append("<text>Каретка отправлена...</text>")
+            console.log("cart_start")
+        });
+        $("#reset_cart").click(function (){
+            $("#run_cart").prop("disabled", false);
+            $("#reset_cart").prop("disabled", true);
+            sendRequest("resetCart", "POST", null);
+            $("#log").append("<text>Каретка возвращается...</text>")
+            console.log("resetCart")
+        });
+        $("#stop_cart").click(function (){
+            $("#run_cart").prop("disabled", false);
+            $("#reset_cart").prop("disabled", false);
+            sendRequest("stopCart", "POST", null);
+            $("#log").append("<text>Каретка останавливается...</text>")
+            console.log("stopCart")
+        });
+
+        $("#reboot").click(function (){
+            $("#lidar_need_reboot").addClass("hidden");
+            $("#lidar_need_config").addClass("hidden");
+            $("#lidar_ready").addClass("hidden");
+            $("#lidar_wait_answer").removeClass("hidden");
+
+            sendRequest("rebootLidar", "POST", null);
+            console.log("sent_reboot_request")
+            $("#log").append("<text>Перезапуск Lidar инициирован.</text><text>...</text>")
+            $("#reboot").prop( "disabled", true );
+            $("#configure").prop( "disabled", true );
+
+        });
+
+        $("#configure").click(function (){
+            $("#lidar_need_reboot").addClass("hidden");
+            $("#lidar_need_config").addClass("hidden");
+            $("#lidar_ready").addClass("hidden");
+            $("#lidar_wait_answer").removeClass("hidden");
+            sendRequest("configureLidar", "POST", null);
+            console.log("sent_configure_request")
+            $("#reboot").prop( "disabled", true );
+            $("#configure").prop( "disabled", true );
+            $("#log").append("<text>Отправлен запрос конфигурации Lidar.</text><text>...</text>")
+        });
+
+    });
+
+</script>
+</html>
