@@ -66,44 +66,47 @@ public class ScanResults {
                 "<div><div><div>Время:</div><div>" + time + "</div></div></div>" +
                 "<div><div><h3>" + (acceptMark?"ОДОБРЕНО":"ОТКЛАНЕНО") + "</h3></div></div>" +
                 "<div>" +
-                    "<div>" +
-                        "<div>Высота (h1):</div>"  + "<div>" + h1 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Высота (h2):</div>"  + "<div>" + h2 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Высота (h3):</div>"  + "<div>" + h3 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Диапазон</div>"  + "<div>" + Math.min(h1, Math.min(h2, h3)) + " - " + Math.max(h1, Math.max(h2, h3)) + "</div>" +
-                    "</div>" +
+                "<div>" +
+                "<div>Высота (h1):</div>"  + "<div>" + h1 + "</div>" +
                 "</div>" +
                 "<div>" +
-                    "<div>" +
-                        "<div>Длина (l1):</div>"  + "<div>" + l1 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Длина (l2):</div>"  + "<div>" + l2 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Длина (l3):</div>"  + "<div>" + l3 + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Диапазон</div>"  + "<div>" + Math.min(l1, Math.min(l2, l3)) + " - " + Math.max(l1, Math.max(l2, l3)) + "</div>" +
-                    "</div>" +
+                "<div>Высота (h2):</div>"  + "<div>" + h2 + "</div>" +
                 "</div>" +
                 "<div>" +
-                    "<div>" +
-                        "<div>Максимальное отклонение:</div>"  + "<div>" + maxDeviation + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Минимальное отклонение:</div>"  + "<div>" + minDeviation + "</div>" +
-                    "</div>" +
-                    "<div>" +
-                        "<div>Диапазон</div>"  + "<div>" + minDeviation + " - " + maxDeviation + "</div>" +
-                    "</div>" +
+                "<div>Высота (h3):</div>"  + "<div>" + h3 + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Диапазон</div>"  + "<div>" + Math.min(h1, Math.min(h2, h3)) + " - " + Math.max(h1, Math.max(h2, h3)) + "</div>" +
+                "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>" +
+                "<div>Длина (l1):</div>"  + "<div>" + l1 + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Длина (l2):</div>"  + "<div>" + l2 + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Длина (l3):</div>"  + "<div>" + l3 + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Диапазон</div>"  + "<div>" + Math.min(l1, Math.min(l2, l3)) + " - " + Math.max(l1, Math.max(l2, l3)) + "</div>" +
+                "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>" +
+                "<div>Максимальное отклонение:</div>"  + "<div>" + maxDeviation + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Минимальное отклонение:</div>"  + "<div>" + minDeviation + "</div>" +
+                "</div>" +
+                "<div>" +
+                "<div>Диапазон</div>"  + "<div>" + minDeviation + " - " + maxDeviation + "</div>" +
+                "</div>" +
                 "</div>";
     }
 
+    public String getShortHTML(){
+        return "<button onclick='getInfo(" + id + ")' class='exist_anode'><text>" + id + "</text><text> - тип </text><text>" + type + "</text> <img class='accept_img'></div>";
+    }
 }

@@ -16,9 +16,9 @@ import java.util.List;
 @Controller
 public class MainController {
 
-
     @Autowired
     private final ScanResultsRepo scanResultsRepo;
+    ScanResults scanResults = new ScanResults();
 
     public MainController(ScanResultsRepo scanResultsRepo) {
         this.scanResultsRepo = scanResultsRepo;
@@ -27,17 +27,17 @@ public class MainController {
     @RequestMapping(value = "/lidar", method = RequestMethod.GET)
     public String getAllScans(Model model){
         List<ScanResults> data = scanResultsRepo.findAll();
+
         try {
-            model.addAttribute("html", data.get(0).getHTML());
+            model.addAttribute("anodes", data);
+            model.addAttribute("html", scanResults.getHTML());
         }
         catch (Exception e){
             System.out.println(e);
         }
+
         return "main";
     }
-
-
-
 
     /*
     @GetMapping("/register")

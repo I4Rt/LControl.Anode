@@ -1,19 +1,26 @@
 package com.i4rt.easyscan.controllers;
 
 import com.i4rt.easyscan.interfaces.ScanResultsRepo;
+import com.i4rt.easyscan.lidarControl.ComPort;
+import com.i4rt.easyscan.lidarControl.Connect;
+import com.i4rt.easyscan.lidarControl.CountingTest;
+import com.i4rt.easyscan.lidarControl.TestPy;
 import com.i4rt.easyscan.model.ScanResults;
+import jssc.SerialPort;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
 
 @org.springframework.web.bind.annotation.RestController
 public class RestController {
 
     @Autowired
     private final ScanResultsRepo scanResultsRepo;
+    SerialPort serialPort = Connect.connect();
+    ScanResults scanResults = new ScanResults();
 
     public RestController(ScanResultsRepo scanResultsRepo) {
         this.scanResultsRepo = scanResultsRepo;
@@ -21,54 +28,70 @@ public class RestController {
 
 
     @RequestMapping(value = "startScan", method = RequestMethod.POST)
-    public String update(@RequestBody String row_data) throws InterruptedException {
-        ScanResults new_data = new ScanResults();
-        new_data.setAcceptMark(true);
-        new_data.setType(1);
-        new_data.setH1(50.1);
-        new_data.setH2(50.1);
-        new_data.setH3(50.1);
-        new_data.setL1(30.1);
-        new_data.setL2(30.1);
-        new_data.setL3(30.1);
-        new_data.setMaxDeviation(0.01);
-        new_data.setMinDeviation(-0.01);
-        new_data.setTime("11.11.2001 11:01:32.11432");
-        System.out.println(new_data);
-        scanResultsRepo.save(new_data);
-
+    public String startScan(@RequestBody String row_data) throws InterruptedException, IOException {
+        //ComPort.connect(serialPort, 3);
+        System.out.println("Start Scan");
+        CountingTest.run();
+        Thread.sleep(1000);
         List<ScanResults> data = scanResultsRepo.findAllOrderById();
-        return new_data.getHTML();
+        return scanResults.getHTML();
     }
-
 
     @RequestMapping(value = "rebootLidar", method = RequestMethod.POST)
     public String reboot(@RequestBody String row_data) throws InterruptedException {
+        //try {
+        //    TestPy.runPython(3);
+        //} catch (IOException | InterruptedException ioException) {
+        //    ioException.printStackTrace();
+        //}
         Thread.sleep(1000);
+        System.out.println("Reboot");
         return "reboot_done";
     }
 
     @RequestMapping(value = "configureLidar", method = RequestMethod.POST)
     public String configureLidar(@RequestBody String row_data) throws InterruptedException {
+        //try {
+        //    TestPy.runPython(2);
+        //    TestPy.runPython(2);
+        //} catch (IOException | InterruptedException ioException) {
+        //    ioException.printStackTrace();
+        //}
         Thread.sleep(1000);
+        System.out.println("Configure");
         return "configure_done";
     }
 
     @RequestMapping(value = "runCart", method = RequestMethod.POST)
     public String runCart(@RequestBody String row_data) throws InterruptedException {
+        //ComPort.connect(serialPort, 3);
         Thread.sleep(1000);
+        System.out.println("Start Lidar");
         return "run_cart";
     }
 
     @RequestMapping(value = "stopCart", method = RequestMethod.POST)
     public String stopCart(@RequestBody String row_data) throws InterruptedException {
+        //ComPort.connect(serialPort, 1);
         Thread.sleep(1000);
+        System.out.println("Stop Lidar");
         return "cart_stopped";
     }
     @RequestMapping(value = "resetCart", method = RequestMethod.POST)
     public String resetCart(@RequestBody String row_data) throws InterruptedException {
+        //ComPort.connect(serialPort, 2);
         Thread.sleep(1000);
+        System.out.println("Initial position");
         return "cart_reset";
     }
 
+    @RequestMapping(value = "getExistScan/{id}", method = RequestMethod.GET)
+    public String getExistScan(@PathVariable Long id) throws InterruptedException {
+        return scanResultsRepo.getById(id).getHTML();
+    }
+
+    @RequestMapping(value = "getShort", method = RequestMethod.GET)
+    public String getShort(){
+        return scanResultsRepo.findAllOrderById().get(0).getShortHTML();
+    }
 }

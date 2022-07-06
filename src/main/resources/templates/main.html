@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>LControl.An</title>
+    <title>Title</title>
 </head>
 <style>
     body{
@@ -67,6 +67,8 @@
     }
 
     .history_info_cnt{
+        min-height:500px;
+        min-width: 250px;
         height:500px;
         width: 250px;
         border: thick double #ACACAC;
@@ -301,11 +303,12 @@
 
             <div class="history_cnt">
                 <h3>История</h3>
-                <div class="history_info_cnt">
-                    <div><text>000547432 - тип 1</text> <img class="accept_img"></div>
-                    <div><text>000547433 - тип 1</text> <img class="accept_img"></div>
-                    <div><text>000547434 - тип 1</text> <img class="accept_img"></div>
-                    <div><text>000547435 - тип 1</text> <img class="reject_img"></div>
+                <div class="history_info_cnt" th:each="anode : ${anodes}">
+                    <button th:attr="onclick=|getInfo(${anode.getId})|" class="exist_anode"><text th:utext="${anode.getId}">000547432</text><text> - тип </text><text th:utext="${anode.getType}"></text> <img class="accept_img"></button>
+
+<!--                    <div><text>000547433 - тип 1</text> <img class="accept_img"></div>-->
+<!--                    <div><text>000547434 - тип 1</text> <img class="accept_img"></div>-->
+<!--                    <div><text>000547435 - тип 1</text> <img class="reject_img"></div>-->
                 </div>
             </div>
             <div class="main_cnt">
@@ -318,7 +321,7 @@
                 </div>
                 <div class="downside_cnt">
                     <div class="statistic">
-                        <div><text>Lidar: <text id="lidar_need_reboot" class="reject" >Нужна перезагрузка</text> <text id="lidar_need_config" class="reject hidden" >Нужна конфигурация</text> <text id="lidar_ready" class="accept hidden" >Готов к сканированию</text> <img id="lidar_wait_answer" class="lidar_wait_status hidden" src="img/loading.gif"></text></div>
+                        <div><text>Lidar: <text id="lidar_need_reboot" class="reject" >Нужна конфигурация</text> <text id="lidar_need_config" class="reject hidden" >Нужна конфигурация</text> <text id="lidar_ready" class="accept hidden" >Готов к сканированию</text> <img id="lidar_wait_answer" class="lidar_wait_status hidden" src="img/loading.gif"></text></div>
                         <div><text>Анод: <text class="reject">Отсутствует</text></text></div>
                     </div>
                     <div class="actions">
@@ -340,12 +343,14 @@
 <script>
     function sendRequest(to, type, message){
         let feedback;
+
         fetch(to, {
             method: type,
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(message),
+
+            body: (type != "GET") ? JSON.stringify(message) : null,
         })
             .then((response) => {
                 scan_results = response;
@@ -353,11 +358,25 @@
                 if(to == "startScan"){
                     console.log(response.text().then(function (data){
                         $(".text_info_cnt").html(data)
+                        sendRequest("getShort", "GET", "");
                     }));
                     $(".represent_loading").toggleClass("hidden");
                     $(".represent").toggleClass("hidden");
                     $("#log").append("<text>Сканирование окончено.</text>")
                 }
+                if(to == "startScan"){
+                    response.text().then(function (data){
+                        $(".history_info_cnt").append(data)
+                    })
+                }
+                
+                if(to.includes("getExistScan")){
+                    response.text().then(function (data){
+                        console.log(data)
+                        $(".text_info_cnt").html(data)
+                    })
+                }
+
                 if(to == "rebootLidar"){
                     $("#lidar_need_reboot").addClass("hidden");
                     $("#lidar_need_config").removeClass("hidden");
@@ -371,7 +390,7 @@
                 }
                 if(to == "configureLidar"){
                     $("#lidar_need_reboot").addClass("hidden");
-                    $("#lidar_need_config").addClass("hidden");
+                    //$("#lidar_need_config").addClass("hidden");
                     $("#lidar_ready").removeClass("hidden");
                     $("#lidar_wait_answer").addClass("hidden");
                     $("#reboot").prop( "disabled", false );
@@ -399,7 +418,7 @@
 
     $(document).ready(function (){
         $("#start").prop( "disabled", true );
-        $("#configure").prop( "disabled", true );
+        $("#configure").prop( "disabled", false );
 
         $("#start").click(function (){
             $(".represent").toggleClass("hidden");
@@ -438,7 +457,7 @@
             }
         });
         $("#run_cart").click(function (){
-            $("#run_cart").prop("disabled", true);
+            $("#run_cart").prop("disabled", false);
             $("#reset_cart").prop("disabled", false);
             sendRequest("runCart", "POST", null);
             $("#log").append("<text>Каретка отправлена...</text>")
@@ -446,7 +465,7 @@
         });
         $("#reset_cart").click(function (){
             $("#run_cart").prop("disabled", false);
-            $("#reset_cart").prop("disabled", true);
+            $("#reset_cart").prop("disabled", false);
             sendRequest("resetCart", "POST", null);
             $("#log").append("<text>Каретка возвращается...</text>")
             console.log("resetCart")
@@ -486,6 +505,10 @@
         });
 
     });
+
+    function getInfo(id){
+        sendRequest("getExistScan/" + id, "GET", "")
+    }
 
 </script>
 </html>

@@ -1,8 +1,10 @@
 package com.i4rt.easyscan.lidarControl;
 
-import junit.framework.*;
-import org.python.core.PyException;
 import org.python.util.PythonInterpreter;
+import org.python.core.*;
+
+
+import junit.framework.*;
 
 public class DataFromLidar extends TestCase {
     private static String[] fullText;
