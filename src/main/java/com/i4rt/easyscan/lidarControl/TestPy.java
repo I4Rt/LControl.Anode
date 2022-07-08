@@ -150,9 +150,9 @@ public class TestPy {
         sr.setMaxDeviation(positiveDeviations.get(positiveDeviations.size() - 1));
         sr.setMinDeviation(-1 * negativeDeviations.get(negativeDeviations.size() - 1));
 
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-        Date date = new Date();
-        sr.setTime(formatter.format(date));
+        //SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        //Date date = new Date();
+        sr.setTime(jsonObject.getAsJsonArray("time").getAsString());
 
         Boolean needCheckMark = false;
         Boolean outOfBoundsHeight = false;
@@ -162,13 +162,13 @@ public class TestPy {
         final Double type2StandardLength = 1.55;
         final Double standardHeight = 0.575;
 
-        final Double maxHeightDeviation = 0.015;
-        final Double maxLengthDeviation = 0.02;
+        final Double maxHeightDeviation = 0.02;
+        final Double maxLengthDeviation = 0.03;
 
 
 
-        if(Math.abs(sr.getL1() - sr.getL2()) < 0.04 && Math.abs(sr.getL1() - sr.getL3()) < 0.04 && Math.abs(sr.getL3() - sr.getL2()) < 0.04){
-            if(Math.abs(sr.getH1() - sr.getH2()) < 0.03 && Math.abs(sr.getH1() - sr.getH3()) < 0.03 && Math.abs(sr.getH3() - sr.getH2()) < 0.03) {
+        if(Math.abs(sr.getL1() - sr.getL2()) < 0.06 && Math.abs(sr.getL1() - sr.getL3()) < 0.06 && Math.abs(sr.getL3() - sr.getL2()) < 0.06){
+            if(Math.abs(sr.getH1() - sr.getH2()) < 0.04 && Math.abs(sr.getH1() - sr.getH3()) < 0.04 && Math.abs(sr.getH3() - sr.getH2()) < 0.04) {
                 needCheckMark = false;
             }
         }

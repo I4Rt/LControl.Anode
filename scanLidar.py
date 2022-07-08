@@ -15,7 +15,6 @@ import numpy
 import pandas as pd
 from sklearn.cluster import DBSCAN
 
-
 def counting_arrays(string, choice):
     angle_count = 0
     while len(string) > 1:
@@ -54,105 +53,174 @@ def func_chunk(lst):
         e_c = lst[x: 3 + x]
         yield e_c
 
-
-def get_plot_DBSCAN(data_2D_prepare, max_step=0.02, min_samples_got=7):
+def get_plot_DBSCAN(data_2D_prepare, max_step = 0.02, min_samples_got=7):
     db = DBSCAN(eps=max_step, min_samples=min_samples_got).fit(data_2D_prepare)
     center_x = 0
     for point in data_2D_prepare:
-        center_x += point[0]
-    center_x = center_x / len(data_2D_prepare)
-
+        center_x+= point[0]
+    center_x = center_x/len(data_2D_prepare)
+    
     plots_unique_val, counts = numpy.unique(db.labels_, return_counts=True)
     plots = []
     plot_color_array = []
     for plot_color in plots_unique_val:
         plot = []
-        if (plot_color != 1):
+        if(plot_color != 1):
             for point_id in range(len(db.labels_)):
-                if (db.labels_[point_id] == plot_color):
+                if(db.labels_[point_id] == plot_color):
                     plot.append(data_2D_prepare[point_id])
             plots.append(plot)
             plot_color_array.append(plot_color)
-
+    
     min_distance = 0.2
     result_plot_id = 0
-
+    
     for plot_id in range(len(plots)):
-        # display_data([plots[plot_id]], [7], etalon_marker = False)
+        #display_data([plots[plot_id]], [7], etalon_marker = False)
         for point in plots[plot_id]:
-            if (abs(point[0] - center_x) < min_distance):
+            if(abs(point[0] - center_x) < min_distance):
                 min_distance = abs(point[0] - center_x)
                 result_plot_id = plot_id
     return plots[result_plot_id], len(plots_unique_val)
+                            
+def get_average(data):
+    x = 0
+    y = 0
+    for i in data:
+        x+= i[0]
+        y+= i[1]
+    return [x/len(data), y/len(data)]
 
+def one_way_analize_advanced(data, averaging_segment_len = 5, indenting_segment_len = 5, significant_angle_1 = 0.2, significant_angle_2 = 1.8, noise_angle = 0.05, not_meaning = 7):
+    total_indent_len = averaging_segment_len + indenting_segment_len
+    data.sort(key=lambda row: (row[0]), reverse=False)
+    left_adder_segment = [data[0] for _ in range(averaging_segment_len + indenting_segment_len)]
+    right_adder_segment = [data[-1] for _ in range(averaging_segment_len + indenting_segment_len)]
+    
+    data = left_adder_segment + data
+    data = data + right_adder_segment
+    
+    plots = []
+    fractures = [data[0]]
+    
+    prev_angle = 0
+    prev_angle_delta = 0
+    current_plot = []
+    current_plot += data[0:total_indent_len - 1]
+    
+    for analize_index in range(total_indent_len, len(data) - total_indent_len):
+        left_averaged = get_average(data[analize_index - total_indent_len : analize_index - indenting_segment_len])
+        right_averaged = get_average(data[analize_index + indenting_segment_len : analize_index + total_indent_len])
+        
+        
+        
+        a1 = (data[analize_index][1] - left_averaged[1])/(data[analize_index][0] - left_averaged[0] + 0.00000001)
+        a2 = (data[analize_index][1] - right_averaged[1])/(data[analize_index][0] - right_averaged[0] + 0.00000001)
+        
+        angle = abs((a1 - a2)/(1 + (a1*a2)))
+        #print(f"angle: {angle}")
+        #print(f"Prev delta: {prev_angle_delta}")
+        
+        
+        #bug! 
+        
+        if(prev_angle_delta > 0 and angle <= prev_angle and (abs(angle - prev_angle) > noise_angle or (angle - prev_angle < 0 and abs(angle - prev_angle) > noise_angle*0.5))):
+            if (prev_angle > significant_angle_1):
+                if (len(current_plot) > not_meaning):  
+                    plots.append(current_plot)
+                    if(prev_angle >= significant_angle_2 ):
+
+                        fractures.append(current_plot[-1])
+                    current_plot = []   
+                    
+        current_plot.append(data[analize_index])
+        
+        
+        prev_angle_delta = angle - prev_angle
+        #print(f"Delta: {prev_angle_delta}\n")
+        prev_angle = angle
+        
+    current_plot += data[len(data) - total_indent_len:]
+    plots.append(current_plot)
+    fractures.append(data[-1])
+        
+    del plots[-1][-(averaging_segment_len + indenting_segment_len):]
+    del plots[0][:(averaging_segment_len + indenting_segment_len)] 
+
+    array_c = [[plot_id for point in plots[plot_id]] for plot_id in range(len(plots))]
+    
+    return plots, array_c, fractures
 
 def get_artificial_data_cut(center, data_3d):
-    real_artificial_cut = [[item[1], item[2], item[0]] for item in data_3d if
-                           center - 0.0012 < item[0] < center + 0.0012]
-    real_artificial_cut_2D = [[item[1], item[0]] for item in real_artificial_cut]
-
+    real_artificial_cut = [[item[1], item[2], item[0]] for item in data_3d if center - 0.0012 < item[0] < center + 0.0012]
+    real_artificial_cut_2D = [[item[1], item[0]]  for item in real_artificial_cut if item[0] < 2]
+    
     real_artificial_cut_2D_grabbed = []
     existing_z = []
 
     for i in real_artificial_cut_2D:
-        if (i[0] in existing_z):
+        if( i[0] in existing_z):
             continue
         else:
             real_artificial_cut_2D_grabbed.append(i)
             existing_z.append(i[0])
     print(len(real_artificial_cut_2D_grabbed))
-    # display_data([real_artificial_cut_2D_grabbed], [1 for i in range(len(real_artificial_cut_2D_grabbed))], etalon_marker = False)
+    #display_data([real_artificial_cut_2D_grabbed], [1 for i in range(len(real_artificial_cut_2D_grabbed))], etalon_marker = False)
 
-    prepared_data, val = get_plot_DBSCAN(real_artificial_cut_2D_grabbed, 0.03, 2)
+    prepared_data, val = get_plot_DBSCAN(real_artificial_cut_2D_grabbed, 0.021, 2)
     prepared_data.sort(key=lambda row: (row[0]), reverse=False)
-    # center = (prepared_data[0][0] + prepared_data[-1][0]) / 2 #рассчет середины получившегося среза
-
+    #center = (prepared_data[0][0] + prepared_data[-1][0]) / 2 #рассчет середины получившегося среза
+    
     return prepared_data
 
-
 def get_data_cut(center, data_3d_inside):
-    real_center = (center // 0.002) * 0.002
+    real_center = (center//0.00248)*0.00248
     print(f'real center: {real_center}')
-    # print(data_3d_inside)
+    #print(data_3d_inside)
 
-    real_cut = [[item[0], item[1], item[2]] for item in data_3d_inside if
-                real_center - 0.0011 < item[2] < real_center + 0.0011]  # changed
-    real_cut_2D = [[item[0], item[1]] for item in real_cut]
-    print(real_cut[0])
+    correction = 0
+
+    while True:
+        real_cut = [[item[0], item[1], item[2]] for item in data_3d_inside if real_center-0.0012 + correction < item[2] < real_center+0.0012 + correction] #changed
+        real_cut_2D = [[item[0], item[1]]  for item in real_cut]
+        if(len(real_cut) < 100):
+            correction += 0.0001
+        else:
+            break
+
 
     real_cut_2D_grabbed = []
     existing_z = []
 
     for i in real_cut_2D:
-        if (i[0] in existing_z):
+        if( i[0] in existing_z):
             continue
         else:
             real_cut_2D_grabbed.append(i)
             existing_z.append(i[0])
     print(len(real_cut_2D_grabbed))
-    display_data([real_cut_2D_grabbed], [1 for i in range(len(real_cut_2D_grabbed))], etalon_marker = False)
+    #display_data([real_cut_2D_grabbed], [1 for i in range(len(real_cut_2D_grabbed))], etalon_marker = False)
 
-    prepared_data, val = get_plot_DBSCAN(real_cut_2D_grabbed, 0.015, 5)
+    prepared_data, val = get_plot_DBSCAN(real_cut_2D_grabbed, 0.02, 5)
+
     prepared_data = [item for item in prepared_data if item[0] > -0.3]
-
     return prepared_data
 
-
-def display_data(plots_2D_1, arrayC, fractures=None, etalon_marker=True):
-    colors = ["r.", "g.", "b.", "c.", "y."]
+def display_data(plots_2D_1, arrayC, fractures = None, etalon_marker = True):
+    colors= ["r.", "g.", "b.", "c.", "y."]
     plt.axes().set_aspect(1)
     cur_pos_start = 0
     for i in range(len(plots_2D_1)):
         cur_pos_end = cur_pos_start + len(plots_2D_1[i])
         x = [j[0] for j in plots_2D_1[i]]
         y = [j[1] for j in plots_2D_1[i]]
-        # с = arrayC[cur_pos_start:cur_pos_end]
+        #с = arrayC[cur_pos_start:cur_pos_end]
         cur_pos_start = cur_pos_end
-        if (arrayC[i]) == -1:
+        if(arrayC[i]) == -1:
             color = "k."
         else:
-            color = colors[i % 5]
-        # color = colors[i%5]
+             color = colors[i%5]
+        #color = colors[i%5]
         plt.plot(
             x,
             y,
@@ -160,9 +228,8 @@ def display_data(plots_2D_1, arrayC, fractures=None, etalon_marker=True):
             markersize=2,
         )
 
-    if (etalon_marker):
-        psevdo_main_lines = [{"line": [fractures[fracture_index], fractures[fracture_index + 1]]} for fracture_index in
-                             range(len(fractures) - 1)]
+    if(etalon_marker):
+        psevdo_main_lines = [{"line": [fractures[fracture_index], fractures[fracture_index + 1]]} for fracture_index in range(len(fractures) - 1)]
         colors = ["m", "k"]
         for i in range(len(psevdo_main_lines)):
             x = [j[0] for j in psevdo_main_lines[i]["line"]]
@@ -171,19 +238,14 @@ def display_data(plots_2D_1, arrayC, fractures=None, etalon_marker=True):
             plt.plot(
                 x,
                 y,
-                colors[i % 2],
+                colors[i%2],
                 markersize=2,
             )
 
     plt.show()
 
-
 def calculate_info(data_ready, fractures):
-    main_lines = [[(fractures[point_id + 1][1] - fractures[point_id][1]) / (
-            fractures[point_id + 1][0] - fractures[point_id][0] + 0.0000000001), fractures[point_id][1] - (
-                           (fractures[point_id + 1][1] - fractures[point_id][1]) / (
-                           fractures[point_id + 1][0] - fractures[point_id][0] + 0.000000001)) *
-                   fractures[point_id][0]] for point_id in range(len(fractures) - 1)]
+    main_lines = [[(fractures[point_id + 1][1] - fractures[point_id][1])/(fractures[point_id + 1][0] - fractures[point_id][0] + 0.0000000001), fractures[point_id][1] - ((fractures[point_id + 1][1] - fractures[point_id][1])/(fractures[point_id + 1][0] - fractures[point_id][0] + 0.000000001))*fractures[point_id][0]] for point_id in range(len(fractures) - 1)]
     cur_line_index = 0
     point_id = 0
     cur_min = 0
@@ -191,12 +253,11 @@ def calculate_info(data_ready, fractures):
     min_max_array = []
 
     while (point_id < len(data_ready)):
-        if (data_ready[point_id] != fractures[cur_line_index + 1]):
-            distance = (main_lines[cur_line_index][0] * data_ready[point_id][0] - data_ready[point_id][1] +
-                        main_lines[cur_line_index][1]) / math.sqrt(1 + main_lines[cur_line_index][0] ** 2)
-            if (cur_min > distance):
+        if(data_ready[point_id] != fractures[cur_line_index + 1]):
+            distance = (main_lines[cur_line_index][0] * data_ready[point_id][0] - data_ready[point_id][1] + main_lines[cur_line_index][1])/math.sqrt(1 + main_lines[cur_line_index][0]**2)
+            if(cur_min > distance):
                 cur_min = distance
-            if (cur_max < distance):
+            if(cur_max < distance):
                 cur_max = distance
         else:
             min_max_array.append([cur_min, cur_max])
@@ -205,23 +266,21 @@ def calculate_info(data_ready, fractures):
             cur_line_index += 1
         point_id += 1
 
-    distances = [math.sqrt(
-        (fractures[index][0] - fractures[index + 1][0]) ** 2 + (fractures[index][1] - fractures[index + 1][1]) ** 2) for
-        index in range(len(fractures) - 1)]
+    distances = [math.sqrt((fractures[index][0] - fractures[index + 1][0])**2 + (fractures[index][1] - fractures[index + 1][1])**2) for index in range(len(fractures) - 1)]
     biggest_plot = -1;
     biggest_min_digression = 10;
     biggest_max_digression = -10;
     fracture_id = 0
     plot_coordinates = []
     for index in range(len(distances)):
-        fracture_id += 1;
-        if (distances[index] > biggest_plot):
+        fracture_id+=1;
+        if(distances[index] > biggest_plot):
             biggest_plot = distances[index]
             print(plot_coordinates)
             plot_coordinates = [fractures[fracture_id - 1], fractures[fracture_id]]
-            if (min_max_array[index][0] < biggest_min_digression):
+            if(min_max_array[index][0] < biggest_min_digression):
                 biggest_min_digression = min_max_array[index][0]
-            if (min_max_array[index][1] > biggest_max_digression):
+            if(min_max_array[index][1] > biggest_max_digression):
                 biggest_max_digression = min_max_array[index][1]
 
         print(f"Range: {distances[index]}")
@@ -230,156 +289,84 @@ def calculate_info(data_ready, fractures):
 
     return biggest_plot, biggest_min_digression, biggest_max_digression, plot_coordinates
 
-
-def get_average(data):
-    x = 0
-    y = 0
-    for i in data:
-        x += i[0]
-        y += i[1]
-    return [x / len(data), y / len(data)]
-
-
-def one_way_analize_advanced(data, averaging_segment_len=5, indenting_segment_len=5, significant_angle_1=0.2,
-                             significant_angle_2=1.8, noise_angle=0.05, not_meaning=7):
-    total_indent_len = averaging_segment_len + indenting_segment_len
-    data.sort(key=lambda row: (row[0]), reverse=False)
-    left_adder_segment = [data[0] for _ in range(averaging_segment_len + indenting_segment_len)]
-    right_adder_segment = [data[-1] for _ in range(averaging_segment_len + indenting_segment_len)]
-
-    data = left_adder_segment + data
-    data = data + right_adder_segment
-
-    plots = []
-    fractures = [data[0]]
-
-    prev_angle = 0
-    prev_angle_delta = 0
-    current_plot = []
-    current_plot += data[0:total_indent_len - 1]
-
-    for analize_index in range(total_indent_len, len(data) - total_indent_len):
-        left_averaged = get_average(data[analize_index - total_indent_len: analize_index - indenting_segment_len])
-        right_averaged = get_average(data[analize_index + indenting_segment_len: analize_index + total_indent_len])
-
-        a1 = (data[analize_index][1] - left_averaged[1]) / (data[analize_index][0] - left_averaged[0] + 0.00000001)
-        a2 = (data[analize_index][1] - right_averaged[1]) / (data[analize_index][0] - right_averaged[0] + 0.00000001)
-
-        angle = abs((a1 - a2) / (1 + (a1 * a2)))
-        # print(f"angle: {angle}")
-        # print(f"Prev delta: {prev_angle_delta}")
-
-        # bug!
-
-        if (prev_angle_delta > 0 and angle <= prev_angle and (abs(angle - prev_angle) > noise_angle or (
-                angle - prev_angle < 0 and abs(angle - prev_angle) > noise_angle * 0.5))):
-            if (prev_angle > significant_angle_1):
-                if (len(current_plot) > not_meaning):
-                    plots.append(current_plot)
-                    if (prev_angle >= significant_angle_2):
-                        fractures.append(current_plot[-1])
-                    current_plot = []
-
-        current_plot.append(data[analize_index])
-
-        prev_angle_delta = angle - prev_angle
-        # print(f"Delta: {prev_angle_delta}\n")
-        prev_angle = angle
-
-    current_plot += data[len(data) - total_indent_len:]
-    plots.append(current_plot)
-    fractures.append(data[-1])
-
-    del plots[-1][-(averaging_segment_len + indenting_segment_len):]
-    del plots[0][:(averaging_segment_len + indenting_segment_len)]
-
-    array_c = [[plot_id for point in plots[plot_id]] for plot_id in range(len(plots))]
-
-    return plots, array_c, fractures
-
-
-# Функция перестает работать в случае получение некорректных данных (их отсутствия) хотя бы об одном срезе. В таком случае данные зануляются.
-
-def final_analize_3(data_3d):
+def final_analize_2(data_3d): #Перадать сюда параметром data_3d
     start = datetime.datetime.now()
+
     try:
-        result = {"horizontal": [], "vertical": []}
+        result = {"horizontal": [], "vertical":[], "Exception": "", 'time': str(datetime.datetime.now())}
 
         first_horizontal_test_slice = get_artificial_data_cut(0.1, data_3d)
+        #full_slice = get_artificial_data_cut_NODB(0.1, data_3d)
+        #display_data([full_slice], [1 for i in range(len(full_slice))], etalon_marker = False)
 
         new_cur_lines, array_c, fractures = one_way_analize_advanced(first_horizontal_test_slice,
-                                                                     averaging_segment_len=5,
-                                                                     indenting_segment_len=10,
-                                                                     significant_angle_1=0.6,
-                                                                     significant_angle_2=2.1,
-                                                                     noise_angle=0.4,
-                                                                     not_meaning=7)
-        # if(len(array_c) < 100):
-        #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
+                                                        averaging_segment_len = 10,
+                                                        indenting_segment_len = 10,
+                                                        significant_angle_1 = 0.8,
+                                                        significant_angle_2 = 1.1,
+                                                        noise_angle = 0.6,
+                                                        not_meaning = 15)
 
-        horizontal_biggest_plot_reference, horizontal_biggest_min_digression_reference, horizontal_biggest_max_digression_reference, horizontal_plot_coordinates_reference = calculate_info(
-            first_horizontal_test_slice, fractures)
+        horizontal_biggest_plot_reference, horizontal_biggest_min_digression_reference, horizontal_biggest_max_digression_reference, horizontal_plot_coordinates_reference = calculate_info(first_horizontal_test_slice, fractures)
         display_data(new_cur_lines, array_c, fractures, etalon_marker = True)
 
-        result["horizontal"].append([horizontal_biggest_plot_reference, horizontal_biggest_min_digression_reference,
-                                     horizontal_biggest_max_digression_reference])
+        result["horizontal"].append([horizontal_biggest_plot_reference, horizontal_biggest_min_digression_reference, horizontal_biggest_max_digression_reference])
 
         left_coordinate_Z = horizontal_plot_coordinates_reference[0][0] + 0.05
         right_coordinate_Z = horizontal_plot_coordinates_reference[-1][0] - 0.05
         center_Z = (horizontal_plot_coordinates_reference[0][0] + horizontal_plot_coordinates_reference[-1][0]) / 2
 
-        print(f'left: {left_coordinate_Z}, right: {left_coordinate_Z}')
+        print(f'left: {left_coordinate_Z}, right: {right_coordinate_Z}')
         print(f'Center: {center_Z}')
 
         for i in [left_coordinate_Z, center_Z, right_coordinate_Z]:
             vertical_slice = get_data_cut(i, data_3d)
+            #center_Z = (first_horizontal_test_slice[0][1] + first_horizontal_test_slice[-1][1]) / 2
+
+            #print(center_Z)
 
             new_cur_lines, array_c, fractures = one_way_analize_advanced(vertical_slice,
-                                                                         averaging_segment_len=5,
-                                                                         indenting_segment_len=10,
-                                                                         significant_angle_1=0.6,
-                                                                         significant_angle_2=0.9,
-                                                                         noise_angle=0.4,
-                                                                         not_meaning=5)
-
-            # if (len(array_c) < 150):
-            #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
-
-            vertical_biggest_plot, vertical_biggest_min_digression, vertical_biggest_max_digression, vertical_plot_coordinates = calculate_info(
-                vertical_slice, fractures)
+                                                            averaging_segment_len = 3, #3      #5      #5
+                                                            indenting_segment_len = 5, #7      #7      #7
+                                                            significant_angle_1 = 0.4, #0.4    #0.4    #0.4
+                                                            significant_angle_2 = 1,   #0.6    #0.65   #0.6
+                                                            noise_angle = 0.3,         #0.2    #0.3    #0.25
+                                                            not_meaning = 7)           #7      #10     #7
+            vertical_biggest_plot, vertical_biggest_min_digression, vertical_biggest_max_digression, vertical_plot_coordinates = calculate_info(vertical_slice, fractures)
             display_data(new_cur_lines, array_c, fractures, etalon_marker = True)
 
-            result["vertical"].append(
-                [vertical_biggest_plot, vertical_biggest_min_digression, vertical_biggest_max_digression])
+            result["vertical"].append([vertical_biggest_plot, vertical_biggest_min_digression, vertical_biggest_max_digression])
 
-        top_horizontal_X = vertical_plot_coordinates[-1][0]
-        bottom_horizontal_X = vertical_plot_coordinates[0][0]
+        top_horizontal_X = vertical_plot_coordinates[-1][0] - 0.1
+        bottom_horizontal_X = vertical_plot_coordinates[0][0] + 0.05
         print(f'top_horizontal_X: {top_horizontal_X}, bottom_horizontal_X: {bottom_horizontal_X}')
 
         for i in [top_horizontal_X, bottom_horizontal_X]:
+            print(f'target: {i}')
+            #full_slice = get_artificial_data_cut_NODB(i, data_3d)
+            #display_data([full_slice], [1 for i in range(len(full_slice))], etalon_marker = False)
             horizontal_slice = get_artificial_data_cut(i, data_3d)
             new_cur_lines, array_c, fractures = one_way_analize_advanced(horizontal_slice,
-                                                                         averaging_segment_len=5,
-                                                                         indenting_segment_len=10,
-                                                                         significant_angle_1=0.6,
-                                                                         significant_angle_2=2.1,
-                                                                         noise_angle=0.4,
-                                                                         not_meaning=7)
-            # if (len(array_c) < 100):
-            #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
+                                                            averaging_segment_len = 10,
+                                                            indenting_segment_len = 10,
+                                                            significant_angle_1 = 0.8,
+                                                            significant_angle_2 = 1.1,
+                                                            noise_angle = 0.6,
+                                                            not_meaning = 15)
 
-            horizontal_biggest_plot, horizontal_biggest_min_digression, horizontal_biggest_max_digression, horizontal_plot_coordinates = calculate_info(
-                horizontal_slice, fractures)
+            horizontal_biggest_plot, horizontal_biggest_min_digression, horizontal_biggest_max_digression, horizontal_plot_coordinates = calculate_info(horizontal_slice, fractures)
+
             display_data(new_cur_lines, array_c, fractures, etalon_marker = True)
 
-            result["horizontal"].append(
-                [horizontal_biggest_plot, horizontal_biggest_min_digression, horizontal_biggest_max_digression])
+
+            result["horizontal"].append([horizontal_biggest_plot, horizontal_biggest_min_digression, horizontal_biggest_max_digression])
+
 
         end = datetime.datetime.now()
         result_time = end - start
-        print(f"\nTime: {result_time}")
-    except Exception:
-        result = {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}
+        print(f"\n\Readtime: {result_time}")
+    except Exception as e:
+        result = {"horizontal": [[0, 0, 0],[0, 0, 0],[0, 0, 0]], "vertical":[[0, 0, 0],[0, 0, 0],[0, 0, 0]], "Exception": e.__class__, 'time': str(datetime.datetime.now())}
     return result
 
 
@@ -430,7 +417,7 @@ c_arrays_len = []
 c_arrays_refl = []
 c_arrays_angle = []
 
-z = 0.00248
+z = 0.0032
 
 s.write(values_return)
 
@@ -443,7 +430,7 @@ for i in range(len(str0)):
     value = value[3406:len(value)]
     counting_arrays(value[0:3364], 3)
     counting()
-    z = z + 0.00248
+    z = z + 0.0032
 
 frame = pd.DataFrame(list(func_chunk(arrays_csv)))
 frame.to_csv('test.csv', index=False)
@@ -457,7 +444,10 @@ print("Writing complete")
 # time.sleep(1)
 print(arrays[0])
 
-print(final_analize_3(arrays))
+print(final_analize_2(arrays))
 
 print("ok")
 # time.sleep(1000)
+  
+
+

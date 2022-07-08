@@ -303,9 +303,10 @@
 
             <div class="history_cnt">
                 <h3>История</h3>
-                <div class="history_info_cnt" th:each="anode : ${anodes}">
-                    <button th:attr="onclick=|getInfo(${anode.getId})|" class="exist_anode"><text th:utext="${anode.getId}">000547432</text><text> - тип </text><text th:utext="${anode.getType}"></text> <img class="accept_img"></button>
-
+                <div class="history_info_cnt" >
+                    <div style="width: 100%; margin: 0px; padding: 0px;" class="row" th:each="curAnode : ${anodes}">
+                        <div style="width: 100%; margin: 0px; padding: 0px;" th:utext="${curAnode}"></div>
+                    </div>
 <!--                    <div><text>000547433 - тип 1</text> <img class="accept_img"></div>-->
 <!--                    <div><text>000547434 - тип 1</text> <img class="accept_img"></div>-->
 <!--                    <div><text>000547435 - тип 1</text> <img class="reject_img"></div>-->

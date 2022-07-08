@@ -63,7 +63,7 @@ public class ScanResults {
         return "<div><div><b>ID" + id + "</b></div></div>" +
                 "<div><div><b>Тип " + type + "</b></div></div>" +
                 "<div><div><div>Время:</div><div>" + time + "</div></div></div>" +
-                "<div><div><h3>" + (acceptMark?"ОДОБРЕНО":"ОТКЛАНЕНО") + "</h3></div></div>" +
+                "<div><div><h3 " + (acceptMark?"style=\"color:#0FBA00\"":"style=\"color:#BB271A\"") + ">" + (acceptMark?"ОДОБРЕНО":"ОТКЛОНЕНО") + "</h3></div></div>" +
                 "<div>" +
                 "<div>" +
                 "<div>Высота (h1):</div>"  + "<div>" + h1 + "</div>" +
@@ -106,6 +106,6 @@ public class ScanResults {
     }
 
     public String getShortHTML(){
-        return "<button onclick='getInfo(" + id + ")' class='exist_anode'><text>" + id + "</text><text> - тип </text><text>" + type + "</text> <img class='accept_img'></div>";
+        return "<button style=\"width:100%; border: none; border-radius: 0px; margin: 0px; margin-bottom: 5px; padding: 5px; display: flex; justify-content: space-between; align-items: center;\" onclick='getInfo(" + id + ")' class='exist_anode'><text>" + id + "</text><text> - тип </text><text>" + type + "</text>" + ((acceptMark) ? "<img class='accept_img'></button>" : "<img class='reject_img'></button>");
     }
 }

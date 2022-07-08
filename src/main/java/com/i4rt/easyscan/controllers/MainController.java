@@ -26,10 +26,16 @@ public class MainController {
 
     @RequestMapping(value = "/lidar", method = RequestMethod.GET)
     public String getAllScans(Model model){
-        List<ScanResults> data = scanResultsRepo.findAll();
+        ArrayList<ScanResults> data = (ArrayList<ScanResults>) scanResultsRepo.findAll();
+        System.out.println(data.size());
+        ArrayList<String> shortInfo = new ArrayList<>();
+
+        for(Integer i = 0; i < data.size(); i++){
+            shortInfo.add(data.get(i).getShortHTML());
+        }
 
         try {
-            model.addAttribute("anodes", data);
+            model.addAttribute("anodes", shortInfo);
             model.addAttribute("html", scanResults.getHTML());
         }
         catch (Exception e){
