@@ -417,7 +417,7 @@ c_arrays_len = []
 c_arrays_refl = []
 c_arrays_angle = []
 
-z = 0.0032
+z = 0.00248
 
 s.write(values_return)
 
@@ -430,7 +430,7 @@ for i in range(len(str0)):
     value = value[3406:len(value)]
     counting_arrays(value[0:3364], 3)
     counting()
-    z = z + 0.0032
+    z = z + 0.00248
 
 frame = pd.DataFrame(list(func_chunk(arrays_csv)))
 frame.to_csv('test.csv', index=False)
