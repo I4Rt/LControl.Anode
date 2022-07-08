@@ -6,6 +6,8 @@ import socket
 import time
 import csv
 
+import serial
+
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -86,7 +88,7 @@ def get_plot_DBSCAN(data_2D_prepare, max_step=0.02, min_samples_got=7):
 
 def get_artificial_data_cut(center, data_3d):
     real_artificial_cut = [[item[1], item[2], item[0]] for item in data_3d if
-                           center - 0.001 < item[0] < center + 0.001]
+                           center - 0.0012 < item[0] < center + 0.0012]
     real_artificial_cut_2D = [[item[1], item[0]] for item in real_artificial_cut]
 
     real_artificial_cut_2D_grabbed = []
@@ -109,12 +111,12 @@ def get_artificial_data_cut(center, data_3d):
 
 
 def get_data_cut(center, data_3d_inside):
-    real_center = (center // 0.0015) * 0.0015
+    real_center = (center // 0.002) * 0.002
     print(f'real center: {real_center}')
     # print(data_3d_inside)
 
     real_cut = [[item[0], item[1], item[2]] for item in data_3d_inside if
-                real_center - 0.0008 < item[2] < real_center + 0.0008]  # changed
+                real_center - 0.0011 < item[2] < real_center + 0.0011]  # changed
     real_cut_2D = [[item[0], item[1]] for item in real_cut]
     print(real_cut[0])
 
@@ -128,9 +130,10 @@ def get_data_cut(center, data_3d_inside):
             real_cut_2D_grabbed.append(i)
             existing_z.append(i[0])
     print(len(real_cut_2D_grabbed))
-    # display_data([real_cut_2D_grabbed], [1 for i in range(len(real_cut_2D_grabbed))], etalon_marker = False)
+    display_data([real_cut_2D_grabbed], [1 for i in range(len(real_cut_2D_grabbed))], etalon_marker = False)
 
     prepared_data, val = get_plot_DBSCAN(real_cut_2D_grabbed, 0.015, 5)
+    prepared_data = [item for item in prepared_data if item[0] > -0.3]
 
     return prepared_data
 
@@ -311,8 +314,8 @@ def final_analize_3(data_3d):
                                                                      significant_angle_2=2.1,
                                                                      noise_angle=0.4,
                                                                      not_meaning=7)
-        if(len(array_c) < 100):
-            return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}
+        # if(len(array_c) < 100):
+        #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
 
         horizontal_biggest_plot_reference, horizontal_biggest_min_digression_reference, horizontal_biggest_max_digression_reference, horizontal_plot_coordinates_reference = calculate_info(
             first_horizontal_test_slice, fractures)
@@ -328,7 +331,7 @@ def final_analize_3(data_3d):
         print(f'left: {left_coordinate_Z}, right: {left_coordinate_Z}')
         print(f'Center: {center_Z}')
 
-        for i in [left_coordinate_Z, center_Z, left_coordinate_Z]:
+        for i in [left_coordinate_Z, center_Z, right_coordinate_Z]:
             vertical_slice = get_data_cut(i, data_3d)
 
             new_cur_lines, array_c, fractures = one_way_analize_advanced(vertical_slice,
@@ -339,8 +342,8 @@ def final_analize_3(data_3d):
                                                                          noise_angle=0.4,
                                                                          not_meaning=5)
 
-            if (len(array_c) < 150):
-                return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}
+            # if (len(array_c) < 150):
+            #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
 
             vertical_biggest_plot, vertical_biggest_min_digression, vertical_biggest_max_digression, vertical_plot_coordinates = calculate_info(
                 vertical_slice, fractures)
@@ -362,8 +365,8 @@ def final_analize_3(data_3d):
                                                                          significant_angle_2=2.1,
                                                                          noise_angle=0.4,
                                                                          not_meaning=7)
-            if (len(array_c) < 100):
-                return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]]}
+            # if (len(array_c) < 100):
+            #     return {"horizontal": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "vertical": [[0, 0, 0], [0, 0, 0], [0, 0, 0]], "error": 1}
 
             horizontal_biggest_plot, horizontal_biggest_min_digression, horizontal_biggest_max_digression, horizontal_plot_coordinates = calculate_info(
                 horizontal_slice, fractures)
@@ -380,11 +383,15 @@ def final_analize_3(data_3d):
     return result
 
 
-slices = 1500
-seconds_period = 0.013
+# slices = 1100
+# seconds_period = 0.013
+slices = 1000
+seconds_period = 0.1
 str0 = []
 arrays = []
 arrays_csv = []
+values_start = [0x00, 0x00, 0x02, 0x03, 0x45, 0x41]
+values_return = [0x00, 0x00, 0x02, 0x02, 0x85, 0x80]
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('192.168.0.3', 2112))
@@ -396,33 +403,39 @@ MESSAGE_START_MON = b'\x02\x02\x02\x02\x00\x00\x00\x14\x73\x45\x4E\x20\x4C\x4D\x
 MESSAGE_STOP_MON = b'\x02\x02\x02\x02\x00\x00\x00\x14\x73\x45\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x6D\x6F\x6E\x20\x00\x5E'
 
 MESSAGE_START_FAST = b'\x02\x02\x02\x02\x00\x00\x00\x11\x73\x45\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x20\x01\x33'
-MESSAGE_STOP_FAST = b'\x02\x02\x02\x02\x00\x00\x00\x11\x73\x45\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x20\x01\x32'
+MESSAGE_STOP_FAST = b'\x02\x02\x02\x02\x00\x00\x00\x11\x73\x45\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x20\x00\x32'
+MESSAGE_ONE = b'\x02\x02\x02\x02\x00\x00\x00\x0F\x73\x52\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x05'
+
+s = serial.Serial('COM5', 57600, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0.1)
+s.write(values_start)
+res = s.readline()
+print(res)
+time.sleep(1)
 
 client.sendall(MESSAGE_START_FAST)
 in_data = client.recv(29)
-print(in_data)
+print(in_data.hex())
+# client.sendall(MESSAGE_STOP_FAST)
+# in_data = client.recv(29)
+# print(in_data)
 
 print(datetime.datetime.now())
 for _ in range(slices):
-    time.sleep(seconds_period)
     in_data = client.recv(5192)
     str0.append(in_data.hex())
 client.sendall(MESSAGE_STOP_FAST)
 print(datetime.datetime.now())
-print(str0[0])
-
-# str0.append(str1)
 
 c_arrays_len = []
 c_arrays_refl = []
 c_arrays_angle = []
 
-z = 0.0015
+z = 0.00248
+
+s.write(values_return)
 
 for i in range(len(str0)):
     value = str0[i]
-    # if i == 10:
-    #     print(str0[i])
     value = value[182:10358]
     counting_arrays(value[0:3364], 1)
     value = value[3406:len(value)]
@@ -430,7 +443,7 @@ for i in range(len(str0)):
     value = value[3406:len(value)]
     counting_arrays(value[0:3364], 3)
     counting()
-    z = z + 0.0015
+    z = z + 0.00248
 
 frame = pd.DataFrame(list(func_chunk(arrays_csv)))
 frame.to_csv('test.csv', index=False)
@@ -447,4 +460,4 @@ print(arrays[0])
 print(final_analize_3(arrays))
 
 print("ok")
-time.sleep(100)
+# time.sleep(1000)

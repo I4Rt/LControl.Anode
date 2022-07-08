@@ -98,7 +98,7 @@ public class CountingTest {
         //TestServer.runServer();
         int a = 0;
         int b = 0;
-        fullText = TestPy.runPython(1);
+//        fullText = TestPy.runPython(1);
         //fullText = fullText.substring(2, fullText.length()-2);
         //fullText = fullText.substring(56, fullText.length()-2);
         //System.out.println(fullText);

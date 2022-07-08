@@ -364,7 +364,7 @@
                     $(".represent").toggleClass("hidden");
                     $("#log").append("<text>Сканирование окончено.</text>")
                 }
-                if(to == "startScan"){
+                if(to == "getShort"){
                     response.text().then(function (data){
                         $(".history_info_cnt").append(data)
                     })
@@ -417,7 +417,7 @@
     let scan_results = null
 
     $(document).ready(function (){
-        $("#start").prop( "disabled", true );
+        $("#start").prop( "disabled", false );
         $("#configure").prop( "disabled", false );
 
         $("#start").click(function (){

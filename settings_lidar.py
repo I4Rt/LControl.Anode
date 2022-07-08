@@ -5,20 +5,27 @@ MESSAGE_LOGIN = b'\x02\x02\x02\x02\x00\x00\x00\x17\x73\x4D\x4E\x20\x53\x65\x74\x
 MESSAGE_CONFIGURE_5 = b'\x02\x02\x02\x02\x00\x00\x00\x20\x73\x57\x4E\x20\x4C\x4D\x44\x73\x63\x61\x6E\x64\x61\x74\x61\x63\x66\x67\x20\x01\x00\x03\x01\x01\x01\x00\x00\x00\x00\x00\x00\x05\x44'
 MESSAGE_LOGOUT = b'\x02\x02\x02\x02\x00\x00\x00\x07\x73\x4D\x4E\x20\x52\x75\x6E\x19'
 MESSAGE_START_MES = b'\x02\x02\x02\x02\x00\x00\x00\x10\x73\x4D\x4E\x20\x4C\x4D\x43\x73\x74\x61\x72\x74\x6D\x65\x61\x73\x68'
+MESSAGE_STANDBY = b'\x02\x02\x02\x02\x00\x00\x00\x0E\x73\x4D\x4E\x20\x4C\x4D\x43\x73\x74\x61\x6E\x64\x62\x79\x65'
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client.connect(('192.168.0.3', 2112))
 
-client.sendall(MESSAGE_LOGIN)
+# client.sendall(MESSAGE_STANDBY)
+# in_data = client.recv(100)
+# print(in_data.hex())
+client.sendall(MESSAGE_START_MES)
 in_data = client.recv(100)
 print(in_data.hex())
-time.sleep(0.5)
-client.sendall(MESSAGE_CONFIGURE_5)
-in_data = client.recv(100)
-print(in_data.hex())
-time.sleep(0.5)
-client.sendall(MESSAGE_LOGOUT)
-in_data = client.recv(100)
-print(in_data.hex())
+# client.sendall(MESSAGE_LOGIN)
+# in_data = client.recv(100)
+# print(in_data.hex())
+# time.sleep(0.5)
+# client.sendall(MESSAGE_CONFIGURE_5)
+# in_data = client.recv(100)
+# print(in_data.hex())
+# time.sleep(0.5)
+# client.sendall(MESSAGE_LOGOUT)
+# in_data = client.recv(100)
+# print(in_data.hex())
 time.sleep(1000)
 
